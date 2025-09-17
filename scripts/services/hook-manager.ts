@@ -5,6 +5,7 @@ import { Parser } from './parser.js'
 import { EffectDialog } from '../ui/effect-dialog.js'
 import { TextFormat } from '../utilities/text-format.js'
 import { Chat } from '../utilities/chat.js'
+import { UserPriority } from '../utilities/user-priority.js'
 // @ts-ignore
 import { FUHooks } from 'projectfu/hooks.mjs'
 
@@ -35,31 +36,28 @@ export class HookManager {
 
   private async handleDamagePipelinePreCalculate(data: any): Promise<void> {
     const effects = Parser.parseHtmlEffects(data.item.system.description)
-
-    await Promise.all(effects.self.mandatory.map(effect =>
-      Interpreter.process(effect, data.sourceActor, data.item, [data.sourceActor])
-    ))
-    if (effects.self.choice.length > 0) {
-      const selectedEffect = await EffectDialog.selectUpdateRequest(effects.self.choice)
-      if (selectedEffect) {
-        const message = `${data.sourceActor.name} applies ${TextFormat.formatUpdateRequest(selectedEffect)}`
-        Chat.createDeferredMessage(data.sourceActor, message)
-        await Interpreter.process(selectedEffect, data.sourceActor, data.item, [data.sourceActor])
-      }
-    }
-
+    await this.processEffects(effects.self, data.sourceActor, data.item, [data.sourceActor])
     if (!data.targets || !Array.isArray(data.targets)) return
-    
-    await Promise.all(effects.target.mandatory.map(effect =>
-      Interpreter.process(effect, data.sourceActor, data.item, data.targets)
+    await this.processEffects(effects.target, data.sourceActor, data.item, data.targets)
+  }
+
+  private async processEffects(
+    effects: { mandatory: any[], choice: any[] },
+    sourceActor: any,
+    item: any,
+    targets: any[]
+  ): Promise<void> {
+    await Promise.all(effects.mandatory.map(effect =>
+      Interpreter.process(effect, sourceActor, item, targets)
     ))
-    if (effects.target.choice.length > 0) {
-      const selectedEffect = await EffectDialog.selectUpdateRequest(effects.target.choice)
-      if (selectedEffect) {
-        const message = `${data.sourceActor.name} applies ${TextFormat.formatUpdateRequest(selectedEffect)}`
-        Chat.createDeferredMessage(data.sourceActor, message)
-        await Interpreter.process(selectedEffect, data.sourceActor, data.item, data.targets)
-      }
+
+    if (effects.choice.length > 0) {
+      const userId = UserPriority.determineOwnerUserId(sourceActor)
+      const selectedEffect = await EffectDialog.selectUpdateRequest(effects.choice, userId)
+      if (!selectedEffect) return
+      const message = `${sourceActor.name} applies ${TextFormat.formatUpdateRequest(selectedEffect)}`
+      Chat.createDeferredMessage(sourceActor, message)
+      await Interpreter.process(selectedEffect, sourceActor, item, targets)
     }
   }
 

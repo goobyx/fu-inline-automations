@@ -1,6 +1,6 @@
 {
-  "name": "FU-Inline-Automations",
-  "version": "1.0.0",
+  "name": "fu-inline-automations",
+  "version": "1.0.1",
   "private": true,
   "scripts": {
     "build": "vite build",
