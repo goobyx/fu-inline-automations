@@ -14,7 +14,6 @@ export class Chat {
           speaker: ChatMessage.getSpeaker({ actor }),
           content
         })
-        Logger.log(`Chat message created: ${content}`)
       } catch (error) {
         Logger.log(`Failed to create chat message: ${error}`)
       }
