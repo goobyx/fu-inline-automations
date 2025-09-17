@@ -13,7 +13,7 @@ This module parses and executes inline commands in item descriptions, saving tim
 
 1. Open FoundryVTT and go to the "Add-on Modules" tab
 2. Click "Install Module"
-3. Paste this manifest URL: `https://github.com/folve/fu-inline-automations/releases/latest/download/module.json`
+3. Paste this manifest URL: `https://github.com/hrmtFran/fu-inline-automations/releases/latest/download/module.json`
 4. Click "Install"
 
 ## Usage
