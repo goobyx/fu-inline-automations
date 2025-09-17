@@ -1,0 +1,40 @@
+# FoundryVTT TypeScript Module Development Rules
+
+## Project Context
+- This is a FoundryVTT module written in TypeScript
+- Target: Foundry VTT v13
+- Uses fvtt-types for type definitions: https://foundryvtt.com/api/v12/modules/foundry.applications.types.html
+- Exclusive for project FU: https://github.com/League-of-Fabulous-Developers/FoundryVTT-Fabula-Ultima
+- Compiles TypeScript to JavaScript for runtime
+
+## Coding Standards
+- Use TypeScript with strict mode enabled
+- Prefer const over let, avoid var
+- svelte for the UI
+- Use meaningful variable names
+- Add type annotations for function parameters and returns
+- Use ES modules (import/export)
+- No semicolons
+- Prefer optional unwrapping and avoid nesting conditionals
+- Indentation (tabs) are only two spaces
+- Functions whose params take multiple lines end in the same line as last param
+- Getter properties preffered over getter functions
+- Use constructors to initialize properties
+- When printing messages to console, use the Logger class, on folder utilities
+
+## FoundryVTT Specific
+- Use game.settings.register() for module settings
+- Hook into Foundry lifecycle with Hooks.once() or Hooks.on()
+- Import paths must use .js extensions even in TypeScript
+- Module registration requires global interface declarations
+
+## File Structure
+- Source: scripts/*.ts
+- Compiled: dist/*.js
+- Entry point: scripts/module.ts
+- Types: scripts/types/types.ts
+
+## Build Process
+- Use tsc to compile TypeScript
+- Output to dist/ directory
+- module.json should reference dist/module.js in esmodules array 

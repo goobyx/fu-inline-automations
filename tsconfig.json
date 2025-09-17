@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "lib": [
+      "dom",
+      "es2022"
+    ],
+    "moduleResolution": "bundler",
+    "module": "esnext",
+    "strict": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "projectfu/*": ["../../../Data/systems/projectfu/module/*"],
+      "foundry-fabula-ultima/*": ["node_modules/foundry-fabula-ultima/module/*"]
+    },
+    "typeRoots": ["./scripts/types", "./node_modules/@types"]
+  },
+  "include": [
+    "scripts/**/*.ts",
+    "scripts/**/*.d.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

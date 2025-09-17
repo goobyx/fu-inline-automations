@@ -1,0 +1,17 @@
+{
+  "fu-inline-automations": {
+    "title": "FU Inline Automations",
+    "description": "Automated inline effect processing for Fabula Ultima",
+    "settings": {
+      "example": "Example Setting"
+    },
+    "ui": {
+      "dialog": {
+        "title": "Effect Automation",
+        "close": "Close",
+        "save": "Save",
+        "cancel": "Cancel"
+      }
+    }
+  }
+} 
