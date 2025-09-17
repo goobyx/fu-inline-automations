@@ -63,12 +63,6 @@ export class Interpreter {
     const damageRequest = new DamageRequest(sourceInfo, targets, damageData)
     
     await DamagePipeline.process(damageRequest);
-
-    /*
-    damageData {type: 'bolt', total: 10, modifierTotal: 0}
-renderContext.sourceInfo InlineSourceInfo 
-{name: 'Unarmed Strike: Mutant', actorUuid: 'Actor.sSqQ66nX8OAw5sjO', itemUuid: 'Actor.sSqQ66nX8OAw5sjO.Item.XlN2TtdK4Sn4ssQS', effectUuid: null}
-*/
   }
 
   private static async addStatus(status: string, targets: game.ProjectFU.FUActor[]) {

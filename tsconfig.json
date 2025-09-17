@@ -16,13 +16,15 @@
       "projectfu/*": ["../../../Data/systems/projectfu/module/*"],
       "foundry-fabula-ultima/*": ["node_modules/foundry-fabula-ultima/module/*"]
     },
-    "typeRoots": ["./scripts/types", "./node_modules/@types"]
+    "typeRoots": ["./scripts/types", "./node_modules/@types"],
+    "types": []
   },
   "include": [
     "scripts/**/*.ts",
     "scripts/**/*.d.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "**/*.svelte"
   ]
 }
