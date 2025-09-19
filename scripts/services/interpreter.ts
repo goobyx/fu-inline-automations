@@ -36,7 +36,7 @@ export class Interpreter {
       const sourceInfo = this.createSourceInfo(sourceActor, item)
       const r = new ResourceRequest(sourceInfo, targets, resourceType, amount)
       
-      r.type === RequestType.GAIN ?
+      request.type === RequestType.GAIN ?
         await ResourcePipeline.processRecovery(r) :
         await ResourcePipeline.processLoss(r)
     } catch (error) {

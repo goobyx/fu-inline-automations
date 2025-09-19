@@ -33,6 +33,7 @@ export class HookManager {
   private registerHooks(): void {
     Hooks.on(FUHooks.ATTACK_EVENT as any, this.handleAttackEvent.bind(this))
     Hooks.on(FUHooks.SKILL_EVENT as any, this.handleSkillEvent.bind(this))
+    Hooks.on(FUHooks.SPELL_EVENT as any, this.handleSpellEvent.bind(this))
   }
 
   private async handleAttackEvent(data: any): Promise<void> {
@@ -43,10 +44,15 @@ export class HookManager {
     await this.handleItemEvent(data)
   }
 
+  private async handleSpellEvent(data: any): Promise<void> {
+    await this.handleItemEvent(data)
+  }
+
+  // sample: 
   private async handleItemEvent(data: any): Promise<void> {
     const item = data.actor.items.getName(data.item.name)
     const effects = Parser.parseHtmlEffects(item.system.description)
-    await this.processEffects(effects.self, data.actor, data.item, [data.actor])
+    await this.processEffects(effects.self, data.actor, item, [data.actor])
     if (!data.targets || !Array.isArray(data.targets)) return
     await this.processEffects(effects.target, data.actor, item, data.targets.map((t: any) => t.actor))
   }
