@@ -1,6 +1,5 @@
 export class UserPriority {
   /**
-   * Determines the appropriate user ID to show the dialog to based on actor ownership
    * Priority: user character > any player owner > GM (all must be online)
    * @param actor The actor to check ownership for
    * @returns User ID or undefined if no suitable user found
@@ -36,7 +35,7 @@ export class UserPriority {
     })
   }
 
-  static checkProcessingRights(targets?: game.ProjectFU.FUActor[]): 
+  static checkProcessingRights(targets?: game.ProjectFU.FUActor[]):
     { canProcess: true, gmUserId: null } | { canProcess: false, gmUserId: string } {
     const currentUserId = (game as any).user?.id
     const gmUserId = (game as any).users?.find((u: any) => u.isGM && u.active)?.id

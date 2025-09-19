@@ -1,13 +1,20 @@
 import { RequestType } from '../types/enums.js'
 import { UpdateRequest, ParsedComponents, ParsedEffects } from '../types/types.js'
 import { Logger } from '../utilities/logger.js'
+import { HtmlSanitizer } from '../utilities/html-sanitizer.js'
 
 export class Parser {
   static parseHtmlEffects(htmlString: string): ParsedEffects {
-    const parser = new DOMParser()
-    const doc = parser.parseFromString(htmlString, 'text/html')
-    const paragraphs = Array.from(doc.querySelectorAll('p'))
+    let doc: Document
+    try {
+      doc = HtmlSanitizer.parseHtmlSafely(htmlString)
+    } catch (error) {
+      const wrappedError = new Error(`Failed to parse HTML effects: ${error instanceof Error ? error.message : String(error)}`)
+      Logger.error(`Parser: ${wrappedError.message}`)
+      throw wrappedError
+    }
 
+    const paragraphs = Array.from(doc.querySelectorAll('p'))
     const selfEffects: ParsedComponents = { mandatory: [], choice: [] }
     const targetEffects: ParsedComponents = { mandatory: [], choice: [] }
 

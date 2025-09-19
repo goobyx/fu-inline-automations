@@ -41,11 +41,15 @@ export class HookManager {
   private async handleSpellEvent(data: any): Promise<void> { await this.handleItemEvent(data) }
 
   private async handleItemEvent(data: any): Promise<void> {
-    const item = data.actor.items.getName(data.item.name)
-    const effects = Parser.parseHtmlEffects(item.system.description)
-    await this.processEffects(effects.self, data.actor, item, [data.actor])
-    if (!data.targets || !Array.isArray(data.targets)) return
-    await this.processEffects(effects.target, data.actor, item, data.targets.map((t: any) => t.actor))
+    try {
+      const item = data.actor.items.getName(data.item.name)
+      const effects = Parser.parseHtmlEffects(item.system.description)
+      await this.processEffects(effects.self, data.actor, item, [data.actor])
+      if (!data.targets || !Array.isArray(data.targets)) return
+      await this.processEffects(effects.target, data.actor, item, data.targets.map((t: any) => t.actor))
+    } catch (error) {
+      Logger.error(`HookManager: Failed to process item event for ${data.item.name}: ${error instanceof Error ? error.message : String(error)}`)
+    }
   }
 
   private async processEffects(
