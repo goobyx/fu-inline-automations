@@ -11,7 +11,10 @@ export enum RequestType {
   /** Rolls an attribute check on an actor - @CHECK[first second (modifier) dl] */
   CHECK = 'CHECK',
   
-  /** Applies an effect that adds a damage type override or modifies an affinity - @TYPE[...] */
+  /** Applies an effect that adds a damage type override or modifies an affinity - @TYPE[...]
+   * damage (all|attack|skill|spell), (all|fire|ice|...), (priority|normal)?
+   * affinity (all|fire|...), (resistance|vulnerability|normal...)
+   */
   TYPE = 'TYPE',
   
   /** Applies an effect to an actor - @EFFECT[uuid|status|base64] */

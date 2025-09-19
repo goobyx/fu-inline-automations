@@ -39,15 +39,9 @@ export class Parser {
   }
 
   private static parseComponents(text: string): ParsedComponents {
-    const mandatory: UpdateRequest[] = []
-    const choice: UpdateRequest[] = []
-
-    // Check for parentheses to identify choice components
     const parenthesesMatch = text.match(/\(([^)]*)\)/)
-
-    if (!parenthesesMatch) {
+    if (!parenthesesMatch) 
       return { mandatory: Parser.parseComponentsFromText(text), choice: [] }
-    }
     
     const choiceText = parenthesesMatch[1]
     const textWithoutParentheses = text.replace(/\([^)]*\)/, '')
@@ -68,5 +62,20 @@ export class Parser {
     }
 
     return components
+  }
+
+  static parseTypeConfig(args: string[]): any {
+    const eventMap: { [key: string]: string } = { sot: 'startOfTurn', eot: 'endOfTurn' }
+    const config: any = {}
+
+    for (const arg of args) {
+      const [prefix, value] = arg.split(':', 2)
+      if (prefix === arg) continue
+      if (prefix === 'e') config.event = eventMap[value] || value
+      else if (prefix === 'i') config.interval = parseInt(value, 10)
+      else if (prefix === 't') config.tracking = value
+    }
+
+    return config
   }
 } 

@@ -26,19 +26,29 @@ export class HookManager {
   initialize(): void {
     if (this.isInitialized) return
 
-    this.registerDamagePipelineHooks()
+    this.registerHooks()
     this.isInitialized = true
   }
 
-  private registerDamagePipelineHooks(): void {
-    Hooks.on(FUHooks.DAMAGE_PIPELINE_PRE_CALCULATE as any, this.handleDamagePipelinePreCalculate.bind(this))
+  private registerHooks(): void {
+    Hooks.on(FUHooks.ATTACK_EVENT as any, this.handleAttackEvent.bind(this))
+    Hooks.on(FUHooks.SKILL_EVENT as any, this.handleSkillEvent.bind(this))
   }
 
-  private async handleDamagePipelinePreCalculate(data: any): Promise<void> {
-    const effects = Parser.parseHtmlEffects(data.item.system.description)
-    await this.processEffects(effects.self, data.sourceActor, data.item, [data.sourceActor])
+  private async handleAttackEvent(data: any): Promise<void> {
+    await this.handleItemEvent(data)
+  }
+
+  private async handleSkillEvent(data: any): Promise<void> {
+    await this.handleItemEvent(data)
+  }
+
+  private async handleItemEvent(data: any): Promise<void> {
+    const item = data.actor.items.getName(data.item.name)
+    const effects = Parser.parseHtmlEffects(item.system.description)
+    await this.processEffects(effects.self, data.actor, data.item, [data.actor])
     if (!data.targets || !Array.isArray(data.targets)) return
-    await this.processEffects(effects.target, data.sourceActor, data.item, data.targets)
+    await this.processEffects(effects.target, data.actor, item, data.targets.map((t: any) => t.actor))
   }
 
   private async processEffects(
@@ -64,7 +74,7 @@ export class HookManager {
   cleanup(): void {
     if (!this.isInitialized) return
 
-    Hooks.off(FUHooks.DAMAGE_PIPELINE_PRE_CALCULATE as any, this.handleDamagePipelinePreCalculate.bind(this))
+    Hooks.off(FUHooks.DAMAGE_PIPELINE_PRE_CALCULATE as any, this.handleAttackEvent.bind(this))
     this.isInitialized = false
   }
 } 

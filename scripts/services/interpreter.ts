@@ -7,6 +7,11 @@ import { InlineSourceInfo } from 'projectfu/helpers/inline-helper.mjs'
 import { ResourceRequest, ResourcePipeline } from 'projectfu/pipelines/resource-pipeline.mjs'
 // @ts-ignore - ProjectFU system modules don't have type declarations
 import { DamageRequest, DamagePipeline } from 'projectfu/pipelines/damage-pipeline.mjs'
+// @ts-ignore - ProjectFU system modules don't have type declarations
+import { InlineType } from 'projectfu/helpers/inline-type.mjs'
+import { source } from 'node_modules/fvtt-types/src/foundry/common/prosemirror/schema/other.mjs'
+import { Parser } from './parser.js'
+
 
 export class Interpreter {
   
@@ -15,7 +20,8 @@ export class Interpreter {
       [RequestType.GAIN, () => this.processResource(request, source, item, targets)],
       [RequestType.LOSS, () => this.processResource(request, source, item, targets)],
       [RequestType.EFFECT, () => this.processEffect(request, source, item, targets)],
-      [RequestType.DMG, () => this.processDamage(request, source, item, targets)]
+      [RequestType.DMG, () => this.processDamage(request, source, item, targets)],
+      [RequestType.TYPE, () => this.processType(request, source, item, targets)]
     ])
     await handlers.get(request.type)?.()
   }
@@ -63,6 +69,21 @@ export class Interpreter {
     const damageRequest = new DamageRequest(sourceInfo, targets, damageData)
     
     await DamagePipeline.process(damageRequest);
+  }
+  
+  private static async processType(request: UpdateRequest, sourceActor: game.ProjectFU.FUActor, item: game.ProjectFU.FUItem, targets: game.ProjectFU.FUActor[]): Promise<void> {
+    if (request.args.length < 2) return
+    const type = request.args[0]
+    await Promise.all(targets.map(target =>
+      InlineType.onDropActor(target, undefined, {
+        dataType: 'InlineType',
+        sourceInfo: this.createSourceInfo(sourceActor, item),
+        type: type,
+        args: request.args.slice(1).join(' '),
+        config: Parser.parseTypeConfig(request.args),
+        ignore: undefined
+      })
+    ))
   }
 
   private static async addStatus(status: string, targets: game.ProjectFU.FUActor[]) {
