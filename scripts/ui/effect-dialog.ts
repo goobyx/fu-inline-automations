@@ -2,7 +2,6 @@ import { UpdateRequest } from '../types/types.js'
 import { TextFormat } from '../utilities/text-format.js'
 import { Logger } from '../utilities/logger.js'
 
-// Socket instance for cross-client communication
 let socket: any
 
 export class EffectDialog {
