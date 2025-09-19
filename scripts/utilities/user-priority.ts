@@ -24,4 +24,34 @@ export class UserPriority {
     }
     return currentUser?.id
   }
+
+  static ownsAllTargets(targets: game.ProjectFU.FUActor[]): boolean {
+    const currentUserId = (game as any).user?.id
+    if (!currentUserId) return false
+
+    return targets.every(target => {
+      const ownership = target.ownership || {}
+      const permission = ownership[currentUserId] || ownership.default || 0
+      return permission >= 3
+    })
+  }
+
+  static checkProcessingRights(targets?: game.ProjectFU.FUActor[]): 
+    { canProcess: true, gmUserId: null } | { canProcess: false, gmUserId: string } {
+    const currentUserId = (game as any).user?.id
+    const gmUserId = (game as any).users?.find((u: any) => u.isGM && u.active)?.id
+    
+    if (gmUserId && currentUserId === gmUserId) return { canProcess: true, gmUserId: null }
+    if (targets && targets.length > 0 && this.ownsAllTargets(targets)) return { canProcess: true, gmUserId: null }
+    if (gmUserId) return { canProcess: false, gmUserId }
+    return { canProcess: true, gmUserId: null }
+  }
+
+  static checkGMDelegation(): { isGM: false, gmUserId: string } | { isGM: true, gmUserId: null } {
+    const currentUserId = (game as any).user?.id
+    const gmUserId = (game as any).users?.find((u: any) => u.isGM && u.active)?.id
+    if (gmUserId && currentUserId !== gmUserId) return { isGM: false, gmUserId }
+    
+    return { isGM: true, gmUserId: null }
+  }
 } 

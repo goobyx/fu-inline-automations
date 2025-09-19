@@ -1,21 +1,9 @@
 import { UpdateRequest } from '../types/types.js'
 import { TextFormat } from '../utilities/text-format.js'
 import { Logger } from '../utilities/logger.js'
-
-let socket: any
+import { executeAsUser } from '../utilities/socket-management.js'
 
 export class EffectDialog {
-  static initializeSocket(): void {
-    if (typeof (globalThis as any).socketlib === 'undefined') return
-
-    try {
-      socket = (globalThis as any).socketlib.registerModule('fu-inline-automations')
-      socket.register('showEffectDialog', (requests: UpdateRequest[]) => EffectDialog.showDialogForUser(requests))
-    } catch (error) {
-      Logger.error('EffectDialog: Failed to initialize socket')
-    }
-  }
-
   static async selectUpdateRequest(requests: UpdateRequest[], targetUserId?: string): Promise<UpdateRequest | undefined> {
     if (requests.length === 0) {
       throw new Error('No requests provided')
@@ -23,12 +11,6 @@ export class EffectDialog {
 
     if (requests.length === 1) {
       return requests[0]
-    }
-
-    const currentUserId = (game as any).user?.id
-
-    if (targetUserId && targetUserId !== currentUserId) {
-      return this.handleCrossClientDialog(requests, targetUserId)
     }
 
     const radioButtons = requests.map((request, index) => {
@@ -66,20 +48,6 @@ export class EffectDialog {
       dialog.addEventListener('close', () => resolve(undefined))
       dialog.render({ force: true })
     })
-  }
-
-  private static async handleCrossClientDialog(requests: UpdateRequest[], targetUserId: string): Promise<UpdateRequest | undefined> {
-    if (!socket) {
-      Logger.warn('Socket not available, showing dialog locally instead')
-      return this.selectUpdateRequest(requests)
-    }
-
-    try {
-      return await socket.executeAsUser('showEffectDialog', targetUserId, requests)
-    } catch (error) {
-      Logger.error('Failed to execute socket command: ' + error)
-      return undefined
-    }
   }
 
   static async showDialogForUser(requests: UpdateRequest[]): Promise<UpdateRequest | undefined> {

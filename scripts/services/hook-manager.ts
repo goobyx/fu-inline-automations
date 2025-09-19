@@ -36,19 +36,10 @@ export class HookManager {
     Hooks.on(FUHooks.SPELL_EVENT as any, this.handleSpellEvent.bind(this))
   }
 
-  private async handleAttackEvent(data: any): Promise<void> {
-    await this.handleItemEvent(data)
-  }
+  private async handleAttackEvent(data: any): Promise<void> { await this.handleItemEvent(data) }
+  private async handleSkillEvent(data: any): Promise<void> { await this.handleItemEvent(data) }
+  private async handleSpellEvent(data: any): Promise<void> { await this.handleItemEvent(data) }
 
-  private async handleSkillEvent(data: any): Promise<void> {
-    await this.handleItemEvent(data)
-  }
-
-  private async handleSpellEvent(data: any): Promise<void> {
-    await this.handleItemEvent(data)
-  }
-
-  // sample: 
   private async handleItemEvent(data: any): Promise<void> {
     const item = data.actor.items.getName(data.item.name)
     const effects = Parser.parseHtmlEffects(item.system.description)
@@ -83,4 +74,6 @@ export class HookManager {
     Hooks.off(FUHooks.DAMAGE_PIPELINE_PRE_CALCULATE as any, this.handleAttackEvent.bind(this))
     this.isInitialized = false
   }
-} 
+}
+
+export const hookManager = HookManager.getInstance() 
