@@ -8,8 +8,7 @@
   },
   "plugins": ["@typescript-eslint"],
   "extends": [
-    "eslint:recommended",
-    "@typescript-eslint/recommended"
+    "eslint:recommended"
   ],
   "env": {
     "browser": true,
@@ -23,7 +22,14 @@
     "CONFIG": "readonly",
     "Hooks": "readonly",
     "foundry": "readonly",
-    "globalThis": "writable"
+    "globalThis": "writable",
+    "FUInlineAutomations": "readonly",
+    "InlineDurationConfig": "readonly",
+    "Actor": "readonly",
+    "Item": "readonly",
+    "ChatMessage": "readonly",
+    "fromUuid": "readonly",
+    "SocketLibSocket": "readonly"
   },
   "rules": {
     "semi": ["error", "never"],

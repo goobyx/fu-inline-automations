@@ -1,13 +1,20 @@
 import { RequestType } from '../types/enums.js'
 import { UpdateRequest, ParsedComponents, ParsedEffects } from '../types/types.js'
 import { Logger } from '../utilities/logger.js'
+import { HtmlSanitizer } from '../utilities/html-sanitizer.js'
 
 export class Parser {
   static parseHtmlEffects(htmlString: string): ParsedEffects {
-    const parser = new DOMParser()
-    const doc = parser.parseFromString(htmlString, 'text/html')
-    const paragraphs = Array.from(doc.querySelectorAll('p'))
+    let doc: Document
+    try {
+      doc = HtmlSanitizer.parseHtmlSafely(htmlString)
+    } catch (error) {
+      const wrappedError = new Error(`Failed to parse HTML effects: ${error instanceof Error ? error.message : String(error)}`)
+      Logger.error(`Parser: ${wrappedError.message}`)
+      throw wrappedError
+    }
 
+    const paragraphs = Array.from(doc.querySelectorAll('p'))
     const selfEffects: ParsedComponents = { mandatory: [], choice: [] }
     const targetEffects: ParsedComponents = { mandatory: [], choice: [] }
 
@@ -39,20 +46,15 @@ export class Parser {
   }
 
   private static parseComponents(text: string): ParsedComponents {
-    const mandatory: UpdateRequest[] = []
-    const choice: UpdateRequest[] = []
-
-    // Check for parentheses to identify choice components
-    const parenthesesMatch = text.match(/\(([^)]*)\)/)
-
-    if (!parenthesesMatch) {
+    // Look for parentheses that contain @ symbols (indicating choices between effects)
+    const choiceMatch = text.match(/\(([^)]*@[^)]*)\)/)
+    if (!choiceMatch)
       return { mandatory: Parser.parseComponentsFromText(text), choice: [] }
-    }
-    
-    const choiceText = parenthesesMatch[1]
-    const textWithoutParentheses = text.replace(/\([^)]*\)/, '')
-    return { 
-      mandatory: Parser.parseComponentsFromText(textWithoutParentheses),
+
+    const choiceText = choiceMatch[1]
+    const textWithoutChoices = text.replace(/\([^)]*@[^)]*\)/, '') // Only remove choice parentheses
+    return {
+      mandatory: Parser.parseComponentsFromText(textWithoutChoices),
       choice: Parser.parseComponentsFromText(choiceText)
     }
   }
@@ -69,4 +71,19 @@ export class Parser {
 
     return components
   }
-} 
+
+  static parseTypeConfig(args: string[]): InlineDurationConfig {
+    const eventMap: { [key: string]: string } = { sot: 'startOfTurn', eot: 'endOfTurn' }
+    const config: InlineDurationConfig = {}
+
+    for (const arg of args) {
+      const [prefix, value] = arg.split(':', 2)
+      if (prefix === arg) continue
+      if (prefix === 'e') config.event = eventMap[value] || value
+      else if (prefix === 'i') config.interval = parseInt(value, 10)
+      else if (prefix === 't') config.tracking = value
+    }
+
+    return config
+  }
+}

@@ -16,4 +16,4 @@ export class Logger {
   static debug(message: string): void {
     console.debug(`${this.PREFIX} ${message}`)
   }
-} 
+}
