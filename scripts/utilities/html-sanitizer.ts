@@ -25,7 +25,7 @@ export class HtmlSanitizer {
         throw error
       }
       
-      this.sanitizeDocument(doc)
+      this.filterAndSecureParagraphs(doc)
       return doc
     } catch (error) {
       if (error instanceof Error) {
@@ -37,53 +37,74 @@ export class HtmlSanitizer {
     }
   }
 
-  private static sanitizeDocument(doc: Document): void {
-    const scripts = doc.querySelectorAll('script')
-    scripts.forEach(script => script.remove())
-    const styles = doc.querySelectorAll('style')
-    styles.forEach(style => style.remove())
+  private static filterAndSecureParagraphs(doc: Document): void {
+    const paragraphs = Array.from(doc.querySelectorAll('p'))
+    paragraphs.forEach(p => { this.secureParagraphElement(p) })
 
-    const allElements = doc.querySelectorAll('*')
-    allElements.forEach(element => {
-      this.sanitizeElement(element)
-    })
+    if (doc.body) {
+      doc.body.innerHTML = ''
+      paragraphs.forEach(p => { doc.body.appendChild(p) })
+    }
   }
 
-  private static sanitizeElement(element: Element): void {
-    const tagName = element.tagName.toLowerCase()
-    if (!this.ALLOWED_TAGS.has(tagName)) {
-      const textNode = document.createTextNode(element.textContent || '')
-      element.parentNode?.replaceChild(textNode, element)
-      return
-    }
-
-    const attributes = Array.from(element.attributes)
+  private static secureParagraphElement(p: Element): void {
+    const attributes = Array.from(p.attributes)
     attributes.forEach(attr => {
       const attrName = attr.name.toLowerCase()
+      const attrValue = attr.value.toLowerCase()
       
       if (attrName.startsWith('on')) {
-        element.removeAttribute(attr.name)
+        p.removeAttribute(attr.name)
+        Logger.warn(`HtmlSanitizer: Removed event handler attribute: ${attr.name}`)
         return
       }
 
-      if (attr.value && (
-        attr.value.toLowerCase().startsWith('javascript:') ||
-        attr.value.toLowerCase().startsWith('data:')
-      )) {
-        element.removeAttribute(attr.name)
+      if (attrValue.includes('javascript:') || 
+          attrValue.includes('data:') || 
+          attrValue.includes('vbscript:') ||
+          attrValue.includes('file:') ||
+          attrValue.includes('about:')) {
+        p.removeAttribute(attr.name)
+        Logger.warn(`HtmlSanitizer: Removed dangerous protocol in attribute: ${attr.name}`)
+        return
+      }
+
+      if (attrName === 'style' && (
+          attrValue.includes('expression') ||
+          attrValue.includes('behavior') ||
+          attrValue.includes('binding') ||
+          attrValue.includes('import') ||
+          attrValue.includes('url('))) {
+        p.removeAttribute(attr.name)
+        Logger.warn(`HtmlSanitizer: Removed dangerous CSS in style attribute`)
         return
       }
       
       if (!this.ALLOWED_ATTRIBUTES.has(attrName)) {
-        element.removeAttribute(attr.name)
+        p.removeAttribute(attr.name)
       }
     })
+
+    if (p.textContent) {
+      const sanitizedText = this.sanitizeTextContent(p.textContent)
+      if (sanitizedText !== p.textContent) {
+        p.textContent = sanitizedText
+        Logger.warn(`HtmlSanitizer: Sanitized suspicious text content in paragraph`)
+      }
+    }
+  }
+
+  private static sanitizeTextContent(text: string): string {
+    return text
+      .replace(/&lt;script/gi, '&amp;lt;script')  // Double-escape script tags
+      .replace(/&lt;\/script/gi, '&amp;lt;/script')
+      .replace(/javascript:/gi, 'blocked:')        // Block javascript protocol
+      .replace(/data:/gi, 'blocked:')              // Block data protocol
+      .replace(/vbscript:/gi, 'blocked:')          // Block vbscript protocol
   }
 
   static extractTextSafely(htmlString: string): string {
-    if (!htmlString || typeof htmlString !== 'string') {
-      return ''
-    }
+    if (!htmlString || typeof htmlString !== 'string') return ''
 
     try {
       const tempDiv = document.createElement('div')

@@ -1,16 +1,27 @@
 // Global declaration for ProjectFU classes
 declare global {
-  // FU System Resource Management Classes
+  namespace FUInlineAutomations {
+    // These were undefined objects
+    interface FUEventTarget {
+      actor: game.ProjectFU.FUActor
+    }
+    interface FUEventData {
+      actor: game.ProjectFU.FUActor
+      item: game.ProjectFU.FUItem
+      targets?: FUEventTarget[]
+    }
+  }
+
   class InlineSourceInfo {
     name: string
     actorUuid: string
     itemUuid: string
-    effectUuid: any
-    constructor(name: string, actorUuid: string, itemUuid: string, effectUuid: any)
+    effectUuid: string | null
+    constructor(name: string, actorUuid: string, itemUuid: string, effectUuid: string | null)
   }
 
   class ResourceRequest {
-    constructor(sourceInfo: InlineSourceInfo, targets: any[], resourceType: string, amount: number)
+    constructor(sourceInfo: InlineSourceInfo, targets: game.ProjectFU.FUActor[], resourceType: string, amount: number)
   }
 
   class ResourcePipeline {
@@ -18,8 +29,14 @@ declare global {
     static processLoss(request: ResourceRequest): Promise<void>
   }
 
+  interface DamageData {
+    type?: string
+    amount?: number
+    [key: string]: unknown
+  }
+
   class DamageRequest {
-    constructor(sourceInfo: InlineSourceInfo, targets: any[], damageData: any)
+    constructor(sourceInfo: InlineSourceInfo, targets: game.ProjectFU.FUActor[], damageData: DamageData)
   }
 
   const DamagePipeline: {
@@ -28,24 +45,35 @@ declare global {
   }
 
   const FUHooks: {
+    ATTACK_EVENT: string
+    SKILL_EVENT: string
+    SPELL_EVENT: string
     DAMAGE_PIPELINE_PRE_CALCULATE: string
     [key: string]: string
   }
 
-  // Extend the game object to include ProjectFU types
+  interface InlineDurationConfig {
+    event?: string
+    interval?: number
+    tracking?: string
+    [key: string]: unknown
+  }
+
   namespace game {
     const system: {
       id: string
-      [key: string]: any
+      [key: string]: unknown
     }
 
     namespace ProjectFU {
-      class FUActor extends Actor {
-        // Add any specific FUActor properties/methods you need
-      }
+      interface FUActor extends Actor { }
 
-      class FUItem extends Item {
-        // Add any specific FUItem properties/methods you need
+      interface FUItem extends Item {
+        name: string
+        system: {
+          description?: string
+          [key: string]: unknown
+        }
       }
     }
   }

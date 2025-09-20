@@ -7,7 +7,7 @@ export class Chat {
    * @param content The message content
    * @param delay Optional delay in milliseconds (default: 100)
    */
-  static createDeferredMessage(actor: any, content: string, delay: number = 100): void {
+  static createDeferredMessage(actor: game.ProjectFU.FUActor, content: string, delay: number = 100): void {
     setTimeout(async () => {
       try {
         await ChatMessage.create({

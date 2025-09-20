@@ -1,4 +1,4 @@
-import { UpdateRequest } from '../types/types.js'
+import { ParsedComponents } from '../types/types.js'
 import { Logger } from '../utilities/logger.js'
 import { Interpreter } from './interpreter.js'
 import { Parser } from './parser.js'
@@ -8,7 +8,6 @@ import { Chat } from '../utilities/chat.js'
 import { UserPriority } from '../utilities/user-priority.js'
 // @ts-ignore
 import { FUHooks } from 'projectfu/hooks.mjs'
-
 
 export class HookManager {
   private static instance: HookManager
@@ -31,32 +30,39 @@ export class HookManager {
   }
 
   private registerHooks(): void {
-    Hooks.on(FUHooks.ATTACK_EVENT as any, this.handleAttackEvent.bind(this))
-    Hooks.on(FUHooks.SKILL_EVENT as any, this.handleSkillEvent.bind(this))
-    Hooks.on(FUHooks.SPELL_EVENT as any, this.handleSpellEvent.bind(this))
+    Hooks.on(FUHooks.ATTACK_EVENT, this.handleAttackEvent.bind(this))
+    Hooks.on(FUHooks.SKILL_EVENT, this.handleSkillEvent.bind(this))
+    Hooks.on(FUHooks.SPELL_EVENT, this.handleSpellEvent.bind(this))
   }
 
-  private async handleAttackEvent(data: any): Promise<void> { await this.handleItemEvent(data) }
-  private async handleSkillEvent(data: any): Promise<void> { await this.handleItemEvent(data) }
-  private async handleSpellEvent(data: any): Promise<void> { await this.handleItemEvent(data) }
+  private async handleAttackEvent(data: FUInlineAutomations.FUEventData): Promise<void> { await this.handleItemEvent(data) }
+  private async handleSkillEvent(data: FUInlineAutomations.FUEventData): Promise<void> { await this.handleItemEvent(data) }
+  private async handleSpellEvent(data: FUInlineAutomations.FUEventData): Promise<void> { await this.handleItemEvent(data) }
 
-  private async handleItemEvent(data: any): Promise<void> {
+  private async handleItemEvent(data: FUInlineAutomations.FUEventData): Promise<void> {
     try {
-      const item = data.actor.items.getName(data.item.name)
+      const item = data.actor.items.getName(data.item.name) as game.ProjectFU.FUItem
+      if (!item) {
+        Logger.warn(`HookManager: Item '${data.item.name}' not found on actor '${data.actor.name}'`)
+        return
+      }
+      
+      if (!item.system?.description) return
+      
       const effects = Parser.parseHtmlEffects(item.system.description)
       await this.processEffects(effects.self, data.actor, item, [data.actor])
       if (!data.targets || !Array.isArray(data.targets)) return
-      await this.processEffects(effects.target, data.actor, item, data.targets.map((t: any) => t.actor))
+      await this.processEffects(effects.target, data.actor, item, data.targets.map(t => t.actor))
     } catch (error) {
       Logger.error(`HookManager: Failed to process item event for ${data.item.name}: ${error instanceof Error ? error.message : String(error)}`)
     }
   }
 
   private async processEffects(
-    effects: { mandatory: any[], choice: any[] },
-    sourceActor: any,
-    item: any,
-    targets: any[]
+    effects: ParsedComponents,
+    sourceActor: game.ProjectFU.FUActor,
+    item: game.ProjectFU.FUItem,
+    targets: game.ProjectFU.FUActor[]
   ): Promise<void> {
     await Promise.all(effects.mandatory.map(effect =>
       Interpreter.process(effect, sourceActor, item, targets)
@@ -74,10 +80,10 @@ export class HookManager {
 
   cleanup(): void {
     if (!this.isInitialized) return
-
-    Hooks.off(FUHooks.DAMAGE_PIPELINE_PRE_CALCULATE as any, this.handleAttackEvent.bind(this))
+    
+    Hooks.off(FUHooks.DAMAGE_PIPELINE_PRE_CALCULATE, this.handleAttackEvent.bind(this))
     this.isInitialized = false
   }
 }
 
-export const hookManager = HookManager.getInstance() 
+export const hookManager = HookManager.getInstance()

@@ -71,9 +71,9 @@ export class Parser {
     return components
   }
 
-  static parseTypeConfig(args: string[]): any {
+  static parseTypeConfig(args: string[]): InlineDurationConfig {
     const eventMap: { [key: string]: string } = { sot: 'startOfTurn', eot: 'endOfTurn' }
-    const config: any = {}
+    const config: InlineDurationConfig = {}
 
     for (const arg of args) {
       const [prefix, value] = arg.split(':', 2)

@@ -75,7 +75,7 @@ async function addStatus(status: string, targets: game.ProjectFU.FUActor[]) {
   ))
 }
 
-function createSourceInfo(sourceActor: any, item: any) {
+function createSourceInfo(sourceActor: game.ProjectFU.FUActor, item: game.ProjectFU.FUItem) {
   return new InlineSourceInfo(item.name, sourceActor.uuid, item.uuid, null)
 }
 

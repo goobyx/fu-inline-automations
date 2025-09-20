@@ -1,3 +1,7 @@
+/// <reference types="../../node_modules/fvtt-types/src/index.d.mts" />
+
+import { ProcessingRights, GMDelegationResult } from '../types/types.js'
+
 export class UserPriority {
   /**
    * Priority: user character > any player owner > GM (all must be online)
@@ -35,8 +39,7 @@ export class UserPriority {
     })
   }
 
-  static checkProcessingRights(targets?: game.ProjectFU.FUActor[]):
-    { canProcess: true, gmUserId: null } | { canProcess: false, gmUserId: string } {
+  static checkProcessingRights(targets?: game.ProjectFU.FUActor[]): ProcessingRights {
     const currentUserId = (game as any).user?.id
     const gmUserId = (game as any).users?.find((u: any) => u.isGM && u.active)?.id
     
@@ -46,7 +49,7 @@ export class UserPriority {
     return { canProcess: true, gmUserId: null }
   }
 
-  static checkGMDelegation(): { isGM: false, gmUserId: string } | { isGM: true, gmUserId: null } {
+  static checkGMDelegation(): GMDelegationResult {
     const currentUserId = (game as any).user?.id
     const gmUserId = (game as any).users?.find((u: any) => u.isGM && u.active)?.id
     if (gmUserId && currentUserId !== gmUserId) return { isGM: false, gmUserId }
