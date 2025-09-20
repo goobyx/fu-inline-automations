@@ -10,36 +10,26 @@ import { UserPriority } from '../utilities/user-priority.js'
 import { FUHooks } from 'projectfu/hooks.mjs'
 
 export class HookManager {
-  private static instance: HookManager
-  private isInitialized = false
+  private static isInitialized = false
 
-  private constructor() { }
-
-  static getInstance(): HookManager {
-    if (!HookManager.instance) {
-      HookManager.instance = new HookManager()
-    }
-    return HookManager.instance
-  }
-
-  initialize(): void {
+  static initialize(): void {
     if (this.isInitialized) return
 
     this.registerHooks()
     this.isInitialized = true
   }
 
-  private registerHooks(): void {
+  private static registerHooks(): void {
     Hooks.on(FUHooks.ATTACK_EVENT, this.handleAttackEvent.bind(this))
     Hooks.on(FUHooks.SKILL_EVENT, this.handleSkillEvent.bind(this))
     Hooks.on(FUHooks.SPELL_EVENT, this.handleSpellEvent.bind(this))
   }
 
-  private async handleAttackEvent(data: FUInlineAutomations.FUEventData): Promise<void> { await this.handleItemEvent(data) }
-  private async handleSkillEvent(data: FUInlineAutomations.FUEventData): Promise<void> { await this.handleItemEvent(data) }
-  private async handleSpellEvent(data: FUInlineAutomations.FUEventData): Promise<void> { await this.handleItemEvent(data) }
+  private static async handleAttackEvent(data: FUInlineAutomations.FUEventData): Promise<void> { await this.handleItemEvent(data) }
+  private static async handleSkillEvent(data: FUInlineAutomations.FUEventData): Promise<void> { await this.handleItemEvent(data) }
+  private static async handleSpellEvent(data: FUInlineAutomations.FUEventData): Promise<void> { await this.handleItemEvent(data) }
 
-  private async handleItemEvent(data: FUInlineAutomations.FUEventData): Promise<void> {
+  private static async handleItemEvent(data: FUInlineAutomations.FUEventData): Promise<void> {
     try {
       const item = data.actor.items.getName(data.item.name) as game.ProjectFU.FUItem
       if (!item) {
@@ -58,7 +48,7 @@ export class HookManager {
     }
   }
 
-  private async processEffects(
+  private static async processEffects(
     effects: ParsedComponents,
     sourceActor: game.ProjectFU.FUActor,
     item: game.ProjectFU.FUItem,
@@ -78,7 +68,7 @@ export class HookManager {
     }
   }
 
-  cleanup(): void {
+  static cleanup(): void {
     if (!this.isInitialized) return
     
     Hooks.off(FUHooks.ATTACK_EVENT, this.handleAttackEvent.bind(this))
@@ -87,5 +77,3 @@ export class HookManager {
     this.isInitialized = false
   }
 }
-
-export const hookManager = HookManager.getInstance()
