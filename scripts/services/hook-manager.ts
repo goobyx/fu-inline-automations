@@ -81,7 +81,9 @@ export class HookManager {
   cleanup(): void {
     if (!this.isInitialized) return
     
-    Hooks.off(FUHooks.DAMAGE_PIPELINE_PRE_CALCULATE, this.handleAttackEvent.bind(this))
+    Hooks.off(FUHooks.ATTACK_EVENT, this.handleAttackEvent.bind(this))
+    Hooks.off(FUHooks.SKILL_EVENT, this.handleSkillEvent.bind(this))
+    Hooks.off(FUHooks.SPELL_EVENT, this.handleSpellEvent.bind(this))
     this.isInitialized = false
   }
 }
