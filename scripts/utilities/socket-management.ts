@@ -40,4 +40,4 @@ export async function executeAsUser<T extends unknown[], R>(handlerName: string,
   } catch (error) {
     throw new Error(`SocketManager: Failed to execute '${handlerName}' for user ${targetUserId} - ${error}`)
   }
-} 
+}

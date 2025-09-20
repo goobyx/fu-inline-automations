@@ -36,9 +36,9 @@ export class HookManager {
         Logger.warn(`HookManager: Item '${data.item.name}' not found on actor '${data.actor.name}'`)
         return
       }
-      
+
       if (!item.system?.description) return
-      
+
       const effects = Parser.parseHtmlEffects(item.system.description)
       await this.processEffects(effects.self, data.actor, item, [data.actor])
       if (!data.targets || !Array.isArray(data.targets)) return
@@ -60,7 +60,7 @@ export class HookManager {
 
     if (effects.choice.length > 0) {
       const userId = UserPriority.determineOwnerUserId(sourceActor)
-      const selectedEffect = await EffectDialog.selectUpdateRequest(effects.choice, userId)
+      const selectedEffect = await EffectDialog.selectUpdateRequest(effects.choice)
       if (!selectedEffect) return
       const message = `${sourceActor.name} applies ${TextFormat.formatUpdateRequest(selectedEffect)}`
       Chat.createDeferredMessage(sourceActor, message)
@@ -70,7 +70,7 @@ export class HookManager {
 
   static cleanup(): void {
     if (!this.isInitialized) return
-    
+
     Hooks.off(FUHooks.ATTACK_EVENT, this.handleAttackEvent.bind(this))
     Hooks.off(FUHooks.SKILL_EVENT, this.handleSkillEvent.bind(this))
     Hooks.off(FUHooks.SPELL_EVENT, this.handleSpellEvent.bind(this))

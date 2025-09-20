@@ -21,7 +21,7 @@ export class UserPriority {
     const ownership = actor.ownership || {}
     for (const user of users) {
       if (user.isGM || !user.active) continue // Skip GMs and offline users
-      
+
       const permission = ownership[user.id] || ownership.default || 0
       if (permission >= 3) return user.id
     }
@@ -42,7 +42,7 @@ export class UserPriority {
   static checkProcessingRights(targets?: game.ProjectFU.FUActor[]): ProcessingRights {
     const currentUserId = (game as any).user?.id
     const gmUserId = (game as any).users?.find((u: any) => u.isGM && u.active)?.id
-    
+
     if (gmUserId && currentUserId === gmUserId) return { canProcess: true, gmUserId: null }
     if (targets && targets.length > 0 && this.ownsAllTargets(targets)) return { canProcess: true, gmUserId: null }
     if (gmUserId) return { canProcess: false, gmUserId }
@@ -53,7 +53,7 @@ export class UserPriority {
     const currentUserId = (game as any).user?.id
     const gmUserId = (game as any).users?.find((u: any) => u.isGM && u.active)?.id
     if (gmUserId && currentUserId !== gmUserId) return { isGM: false, gmUserId }
-    
+
     return { isGM: true, gmUserId: null }
   }
-} 
+}

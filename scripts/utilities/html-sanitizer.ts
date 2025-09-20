@@ -20,11 +20,11 @@ export class HtmlSanitizer {
       const doc = parser.parseFromString(htmlString, 'text/html')
       const parserError = doc.querySelector('parsererror')
       if (parserError) {
-        const error = new Error(`HTML parsing error: ${parserError.textContent || 'Unknown parsing error'}`)
+        const error = new Error(`HTML parsing error: ${parserError.textContent ?? 'Unknown parsing error'}`)
         Logger.error(`HtmlSanitizer: ${error.message}`)
         throw error
       }
-      
+
       this.filterAndSecureParagraphs(doc)
       return doc
     } catch (error) {
@@ -52,15 +52,15 @@ export class HtmlSanitizer {
     attributes.forEach(attr => {
       const attrName = attr.name.toLowerCase()
       const attrValue = attr.value.toLowerCase()
-      
+
       if (attrName.startsWith('on')) {
         p.removeAttribute(attr.name)
         Logger.warn(`HtmlSanitizer: Removed event handler attribute: ${attr.name}`)
         return
       }
 
-      if (attrValue.includes('javascript:') || 
-          attrValue.includes('data:') || 
+      if (attrValue.includes('javascript:') ||
+          attrValue.includes('data:') ||
           attrValue.includes('vbscript:') ||
           attrValue.includes('file:') ||
           attrValue.includes('about:')) {
@@ -70,16 +70,16 @@ export class HtmlSanitizer {
       }
 
       if (attrName === 'style' && (
-          attrValue.includes('expression') ||
+        attrValue.includes('expression') ||
           attrValue.includes('behavior') ||
           attrValue.includes('binding') ||
           attrValue.includes('import') ||
           attrValue.includes('url('))) {
         p.removeAttribute(attr.name)
-        Logger.warn(`HtmlSanitizer: Removed dangerous CSS in style attribute`)
+        Logger.warn('HtmlSanitizer: Removed dangerous CSS in style attribute')
         return
       }
-      
+
       if (!this.ALLOWED_ATTRIBUTES.has(attrName)) {
         p.removeAttribute(attr.name)
       }
@@ -89,7 +89,7 @@ export class HtmlSanitizer {
       const sanitizedText = this.sanitizeTextContent(p.textContent)
       if (sanitizedText !== p.textContent) {
         p.textContent = sanitizedText
-        Logger.warn(`HtmlSanitizer: Sanitized suspicious text content in paragraph`)
+        Logger.warn('HtmlSanitizer: Sanitized suspicious text content in paragraph')
       }
     }
   }
@@ -109,14 +109,14 @@ export class HtmlSanitizer {
     try {
       const tempDiv = document.createElement('div')
       tempDiv.innerHTML = htmlString
-      
+
       const scripts = tempDiv.querySelectorAll('script, style')
       scripts.forEach(el => el.remove())
-      
-      return tempDiv.textContent || tempDiv.innerText || ''
+
+      return tempDiv.textContent ?? tempDiv.innerText ?? ''
     } catch (error) {
       Logger.warn(`HtmlSanitizer: Failed to extract text safely, falling back to empty string - ${error}`)
       return ''
     }
   }
-} 
+}

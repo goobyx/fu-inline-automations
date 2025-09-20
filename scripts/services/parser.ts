@@ -48,12 +48,12 @@ export class Parser {
   private static parseComponents(text: string): ParsedComponents {
     // Look for parentheses that contain @ symbols (indicating choices between effects)
     const choiceMatch = text.match(/\(([^)]*@[^)]*)\)/)
-    if (!choiceMatch) 
+    if (!choiceMatch)
       return { mandatory: Parser.parseComponentsFromText(text), choice: [] }
-    
+
     const choiceText = choiceMatch[1]
     const textWithoutChoices = text.replace(/\([^)]*@[^)]*\)/, '') // Only remove choice parentheses
-    return { 
+    return {
       mandatory: Parser.parseComponentsFromText(textWithoutChoices),
       choice: Parser.parseComponentsFromText(choiceText)
     }
@@ -86,4 +86,4 @@ export class Parser {
 
     return config
   }
-} 
+}

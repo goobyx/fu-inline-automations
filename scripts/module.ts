@@ -15,9 +15,7 @@ function setupSocket() {
   )
 }
 
-Hooks.once('socketlib.ready' as any, () => {
-  setupSocket()
-})
+Hooks.once('socketlib.ready' as any, () => { setupSocket() })
 
 Hooks.once('ready', async function() {
   if (game.system?.id !== 'projectfu') return

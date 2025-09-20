@@ -1,10 +1,8 @@
 import { UpdateRequest } from '../types/types.js'
 import { TextFormat } from '../utilities/text-format.js'
-import { Logger } from '../utilities/logger.js'
-import { executeAsUser } from '../utilities/socket-management.js'
 
 export class EffectDialog {
-  static async selectUpdateRequest(requests: UpdateRequest[], targetUserId?: string): Promise<UpdateRequest | undefined> {
+  static async selectUpdateRequest(requests: UpdateRequest[]): Promise<UpdateRequest | undefined> {
     if (requests.length === 0) {
       throw new Error('No requests provided')
     }
@@ -20,18 +18,18 @@ export class EffectDialog {
 
     return new Promise((resolve) => {
       const dialog = new foundry.applications.api.DialogV2({
-        window: { title: requests[0].title || "Choose an effect" },
+        window: { title: requests[0].title ?? 'Choose an effect' },
         content: radioButtons,
         buttons: [{
-          action: "choice",
-          label: "Apply Effect",
+          action: 'choice',
+          label: 'Apply Effect',
           default: true,
-          callback: (event, button, dialog) => {
+          callback: (event, button): string | null => {
             const formData = new FormData(button.form!)
-            return formData.get('choice')
+            return formData.get('choice') as string | null
           }
         }],
-        submit: async (result) => {
+        submit: async (result): Promise<void> => {
           if (result !== null && result !== undefined) {
             const selectedIndex = parseInt(result as string)
             if (selectedIndex >= 0 && selectedIndex < requests.length) {
@@ -44,7 +42,7 @@ export class EffectDialog {
           }
         }
       })
-      
+
       dialog.addEventListener('close', () => resolve(undefined))
       dialog.render({ force: true })
     })

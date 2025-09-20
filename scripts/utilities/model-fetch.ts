@@ -23,7 +23,7 @@ export async function fetchRequestComponents(sourceUuid: string, itemId: string,
     Logger.warn(`Failed to find target actor with UUID: ${uuid}`)
     return null
   }))
-  .then(results => results.filter(target => target !== null) as game.ProjectFU.FUActor[])
+    .then(results => results.filter(target => target !== null) as game.ProjectFU.FUActor[])
 
   return { sourceActor, item, targets }
-} 
+}

@@ -7,33 +7,33 @@ import { fetchRequestComponents } from '../utilities/model-fetch.js'
 import { InlineAutomations } from './inline-automations.js'
 
 export class Interpreter {
-  
+
   static async executeHandler(request: UpdateRequest, source: game.ProjectFU.FUActor, item: game.ProjectFU.FUItem, targets: game.ProjectFU.FUActor[]): Promise<void> {
     const handlers = new Map<RequestType, () => Promise<void>>([
-      [RequestType.GAIN, () => InlineAutomations.processResource(request, source, item, targets)],
-      [RequestType.LOSS, () => InlineAutomations.processResource(request, source, item, targets)],
-      [RequestType.EFFECT, () => InlineAutomations.processEffect(request, source, item, targets)],
-      [RequestType.DMG, () => InlineAutomations.processDamage(request, source, item, targets)],
-      [RequestType.TYPE, () => InlineAutomations.processType(request, source, item, targets)]
+      [RequestType.GAIN, (): Promise<void> => InlineAutomations.processResource(request, source, item, targets)],
+      [RequestType.LOSS, (): Promise<void> => InlineAutomations.processResource(request, source, item, targets)],
+      [RequestType.EFFECT, (): Promise<void> => InlineAutomations.processEffect(request, source, item, targets)],
+      [RequestType.DMG, (): Promise<void> => InlineAutomations.processDamage(request, source, item, targets)],
+      [RequestType.TYPE, (): Promise<void> => InlineAutomations.processType(request, source, item, targets)]
     ])
     await handlers.get(request.type)?.()
   }
 
-  static async process(request: UpdateRequest, source: game.ProjectFU.FUActor, item: game.ProjectFU.FUItem, targets: game.ProjectFU.FUActor[]): Promise<void> { 
+  static async process(request: UpdateRequest, source: game.ProjectFU.FUActor, item: game.ProjectFU.FUItem, targets: game.ProjectFU.FUActor[]): Promise<void> {
     const processingCheck = UserPriority.checkProcessingRights(targets)
-    
+
     if (!processingCheck.canProcess && processingCheck.gmUserId) {
       try {
         await executeAsUser('processEffect', processingCheck.gmUserId, request, source.uuid, item.id, targets.map(t => t.uuid))
         return
       } catch (error) {
-        Logger.warn('Failed to send effect to GM for processing, processing locally: ' + error)
+        Logger.warn(`Failed to send effect to GM for processing, processing locally: ${  error}`)
       }
     }
 
     await this.executeHandler(request, source, item, targets)
   }
-  
+
   // smaller params for socket efficiency
   static async processEffectAsGM(request: UpdateRequest, sourceUuid: string, itemId: string, targetUuids: string[]): Promise<void> {
     try {
@@ -41,7 +41,7 @@ export class Interpreter {
       if (!sourceActor || !item) return
 
       await this.executeHandler(request, sourceActor, item, targets)
-      } catch (error) {
+    } catch (error) {
       Logger.error(`Failed to process effect as GM: ${error}`)
     }
   }
