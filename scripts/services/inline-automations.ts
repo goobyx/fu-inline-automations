@@ -1,5 +1,7 @@
 // @ts-ignore - ProjectFU system modules don't have type declarations
 import { ResourceRequest, ResourcePipeline } from 'projectfu/pipelines/resource-pipeline.mjs'
+// @ts-ignore - ProjectFU
+import { ExpressionContext, Expressions } from 'projectfu/expressions/expressions.mjs';
 // @ts-ignore - ProjectFU 
 import { DamageRequest, DamagePipeline } from 'projectfu/pipelines/damage-pipeline.mjs'
 // @ts-ignore - ProjectFU 
@@ -13,12 +15,13 @@ import { Parser } from './parser.js'
 
 // @GAIN[amount resource] or @LOSS[amount resource]
 async function processResource(request: UpdateRequest, sourceActor: game.ProjectFU.FUActor, item: game.ProjectFU.FUItem, targets: game.ProjectFU.FUActor[]): Promise<void> {
-  const amount = parseInt(request.args[0] || '0')
+  if (request.args.length < 2) return
   const resourceType = request.args[1]?.toLowerCase()
-  if (isNaN(amount) || !resourceType) return
 
   try {
     const sourceInfo = createSourceInfo(sourceActor, item)
+    const context = ExpressionContext.fromSourceInfo(sourceInfo, targets);
+    const amount = await Expressions.evaluateAsync(request.args[0], context) 
     const r = new ResourceRequest(sourceInfo, targets, resourceType, amount)
     request.type === RequestType.GAIN ?
       await ResourcePipeline.processRecovery(r) :
@@ -43,12 +46,12 @@ async function processEffect(request: UpdateRequest, sourceActor: game.ProjectFU
 // @DMG[amount type]
 async function processDamage(request: UpdateRequest, sourceActor: game.ProjectFU.FUActor, item: game.ProjectFU.FUItem, targets: game.ProjectFU.FUActor[]): Promise<void> {
   if (request.args.length !== 2) return
-  const amount = request.args[0]
   const type = request.args[1]
-
-  const damageData = { type: type, total: amount, modifierTotal: 0 }
   const sourceInfo = createSourceInfo(sourceActor, item)
   sourceInfo.itemUuid = ''
+  const context = ExpressionContext.fromSourceInfo(sourceInfo, targets);
+  const amount = Expressions.evaluateAsync(request.args[0], context)  // use expressions
+  const damageData = { type: type, total: amount, modifierTotal: 0 }
   const damageRequest = new DamageRequest(sourceInfo, targets, damageData)
   
   await DamagePipeline.process(damageRequest);
@@ -79,7 +82,6 @@ function createSourceInfo(sourceActor: game.ProjectFU.FUActor, item: game.Projec
   return new InlineSourceInfo(item.name, sourceActor.uuid, item.uuid, null)
 }
 
-// Export the main functions as InlineAutomations object
 export const InlineAutomations = {
   processResource,
   processEffect,

@@ -22,7 +22,7 @@ export class Interpreter {
   static async process(request: UpdateRequest, source: game.ProjectFU.FUActor, item: game.ProjectFU.FUItem, targets: game.ProjectFU.FUActor[]): Promise<void> { 
     const processingCheck = UserPriority.checkProcessingRights(targets)
     
-    if (!processingCheck.canProcess) {
+    if (!processingCheck.canProcess && processingCheck.gmUserId) {
       try {
         await executeAsUser('processEffect', processingCheck.gmUserId, request, source.uuid, item.id, targets.map(t => t.uuid))
         return

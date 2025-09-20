@@ -46,14 +46,15 @@ export class Parser {
   }
 
   private static parseComponents(text: string): ParsedComponents {
-    const parenthesesMatch = text.match(/\(([^)]*)\)/)
-    if (!parenthesesMatch) 
+    // Look for parentheses that contain @ symbols (indicating choices between effects)
+    const choiceMatch = text.match(/\(([^)]*@[^)]*)\)/)
+    if (!choiceMatch) 
       return { mandatory: Parser.parseComponentsFromText(text), choice: [] }
     
-    const choiceText = parenthesesMatch[1]
-    const textWithoutParentheses = text.replace(/\([^)]*\)/, '')
+    const choiceText = choiceMatch[1]
+    const textWithoutChoices = text.replace(/\([^)]*@[^)]*\)/, '') // Only remove choice parentheses
     return { 
-      mandatory: Parser.parseComponentsFromText(textWithoutParentheses),
+      mandatory: Parser.parseComponentsFromText(textWithoutChoices),
       choice: Parser.parseComponentsFromText(choiceText)
     }
   }
