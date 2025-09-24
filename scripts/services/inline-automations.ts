@@ -90,7 +90,7 @@ async function processType(request: UpdateRequest, sourceActor: game.ProjectFU.F
 async function processWeapon(request: UpdateRequest, sourceActor: game.ProjectFU.FUActor, item: game.ProjectFU.FUItem, targets: game.ProjectFU.FUActor[]) {
   await Promise.all(targets.map(target => 
     InlineWeapon.onDropActor(target, undefined, {
-      type: "InlineWeapon",
+      type: 'InlineWeapon',
       sourceInfo: createSourceInfo(sourceActor, item),
       choices: Parser.parseNonConfigArgs(request.args).join(' '),
       config: Parser.parseTypeConfig(request.args)
