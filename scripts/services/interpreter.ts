@@ -14,7 +14,8 @@ export class Interpreter {
       [RequestType.LOSS, (): Promise<void> => InlineAutomations.processResource(request, source, item, targets)],
       [RequestType.EFFECT, (): Promise<void> => InlineAutomations.processEffect(request, source, item, targets)],
       [RequestType.DMG, (): Promise<void> => InlineAutomations.processDamage(request, source, item, targets)],
-      [RequestType.TYPE, (): Promise<void> => InlineAutomations.processType(request, source, item, targets)]
+      [RequestType.TYPE, (): Promise<void> => InlineAutomations.processType(request, source, item, targets)],
+      [RequestType.WEAPON, (): Promise<void> => InlineAutomations.processWeapon(request, source, item, targets)]
     ])
     await handlers.get(request.type)?.()
   }
