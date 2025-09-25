@@ -38,9 +38,8 @@ async function processResource(request: UpdateRequest, sourceActor: game.Project
 
 // @EFFECT[uuid|status|base64]
 async function processEffect(request: UpdateRequest, sourceActor: game.ProjectFU.FUActor, item: game.ProjectFU.FUItem, targets: game.ProjectFU.FUActor[]): Promise<void> {
-  if (request.args.length !== 1) return
+  if (Parser.parseNonConfigArgs(request.args).length !== 1) return
   const value = request.args[0]
-
   if (CONFIG.statusEffects.find(e => e.id === value)) {
     await addStatus(value, targets)
     return
@@ -52,9 +51,10 @@ async function processEffect(request: UpdateRequest, sourceActor: game.ProjectFU
   }
 
   if (!effect) return
+  const duration = Parser.parseTypeConfig(request.args)
   
   for (const target of targets) {
-    Effects.onApplyEffectToActor(target, effect, createSourceInfo(target, item))
+    Effects.onApplyEffectToActor(target, effect, createSourceInfo(sourceActor, item), duration)
   }
 }
 
