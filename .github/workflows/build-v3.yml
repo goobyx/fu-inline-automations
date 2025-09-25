@@ -57,13 +57,15 @@ jobs:
         ls -la fu-inline-automations.zip module.json
     
     - name: Create Release
-      uses: softprops/action-gh-release@v2
+      uses: ncipollo/release-action@v1
       with:
-        files: "fu-inline-automations.zip,module.json"
+        artifacts: "fu-inline-automations.zip,module.json"
+        tag: "v${{ steps.get_version.outputs.VERSION }}"
+        name: "v${{ steps.get_version.outputs.VERSION }}"
         prerelease: ${{ steps.prerelease.outputs.IS_PRERELEASE }}
-        generate_release_notes: true
-        fail_on_unmatched_files: true
-        draft: false
-        make_latest: false
+        generateReleaseNotes: true
+        allowUpdates: true
+        removeArtifacts: true
+        replacesArtifacts: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
