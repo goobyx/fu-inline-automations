@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.5] - Alpha
+
+### Added
+- Duration for effect commands. 
+  - e.g. @EFFECT[{base 64} e:sot i:1 t:source]
+
 ## [1.0.4] - 2025-09-24
 
 ### Added
