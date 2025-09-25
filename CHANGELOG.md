@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.5] - TBD
+
+### Added 
+- Effect duration
+
 ## [1.0.4] - 2025-09-24
 
 ### Added
