@@ -36,25 +36,6 @@ Some examples then would be
 - you get: @LOSS[5 mp]
 - targets take: @EFFECT[slow] (@EFFECT[dazed] @LOSS[10 mp])
 
-## Development
-
-This module is built with TypeScript and uses Vite for building.
-
-### Setup
-```bash
-npm install
-```
-
-### Building
-```bash
-npm run build
-```
-
-### Development (with watch)
-```bash
-npm run dev
-```
-
 ## Contributing
 
 Contributions are welcome! Please feel free to submit issues, feature requests, or pull requests.
@@ -62,11 +43,6 @@ Contributions are welcome! Please feel free to submit issues, feature requests, 
 ## License
 
 This project is licensed under the GPL-3.0-only License - see the [LICENSE](LICENSE) file for details.
-
-## Support
-
-- **Issues**: [GitHub Issues](https://github.com/goobyx/fu-inline-automations/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/goobyx/fu-inline-automations/discussions)
 
 ## Changelog
 
