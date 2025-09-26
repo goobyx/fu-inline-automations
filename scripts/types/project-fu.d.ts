@@ -45,7 +45,7 @@ declare global {
   }
 
   const FUHooks: {
-    ATTACK_EVENT: string
+    DAMAGE_EVENT: string
     SKILL_EVENT: string
     SPELL_EVENT: string
     DAMAGE_PIPELINE_PRE_CALCULATE: string
