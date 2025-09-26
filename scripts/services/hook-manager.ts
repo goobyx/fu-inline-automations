@@ -20,12 +20,12 @@ export class HookManager {
   }
 
   private static registerHooks(): void {
-    Hooks.on(FUHooks.ATTACK_EVENT, this.handleAttackEvent.bind(this))
+    Hooks.on(FUHooks.DAMAGE_EVENT, this.handleDamageEvent.bind(this))
     Hooks.on(FUHooks.SKILL_EVENT, this.handleSkillEvent.bind(this))
     Hooks.on(FUHooks.SPELL_EVENT, this.handleSpellEvent.bind(this))
   }
 
-  private static async handleAttackEvent(data: FUInlineAutomations.FUEventData): Promise<void> { await this.handleItemEvent(data) }
+  private static async handleDamageEvent(data: FUInlineAutomations.FUEventData): Promise<void> { await this.handleItemEvent(data) }
   private static async handleSkillEvent(data: FUInlineAutomations.FUEventData): Promise<void> { await this.handleItemEvent(data) }
   private static async handleSpellEvent(data: FUInlineAutomations.FUEventData): Promise<void> { await this.handleItemEvent(data) }
 
@@ -59,7 +59,6 @@ export class HookManager {
     ))
 
     if (effects.choice.length > 0) {
-      const userId = UserPriority.determineOwnerUserId(sourceActor)
       const selectedEffect = await EffectDialog.selectUpdateRequest(effects.choice)
       if (!selectedEffect) return
       const message = `${sourceActor.name} applies ${TextFormat.formatUpdateRequest(selectedEffect)}`
@@ -71,7 +70,7 @@ export class HookManager {
   static cleanup(): void {
     if (!this.isInitialized) return
 
-    Hooks.off(FUHooks.ATTACK_EVENT, this.handleAttackEvent.bind(this))
+    Hooks.off(FUHooks.DAMAGE_EVENT, this.handleDamageEvent.bind(this))
     Hooks.off(FUHooks.SKILL_EVENT, this.handleSkillEvent.bind(this))
     Hooks.off(FUHooks.SPELL_EVENT, this.handleSpellEvent.bind(this))
     this.isInitialized = false
