@@ -20,14 +20,20 @@ export class HookManager {
   }
 
   private static registerHooks(): void {
-    Hooks.on(FUHooks.ATTACK_EVENT, this.handleAttackEvent.bind(this))
+    Hooks.on(FUHooks.DAMAGE_PIPELINE_POST_CALCULATE, this.handleDamageEvent.bind(this))
     Hooks.on(FUHooks.SKILL_EVENT, this.handleSkillEvent.bind(this))
     Hooks.on(FUHooks.SPELL_EVENT, this.handleSpellEvent.bind(this))
   }
 
-  private static async handleAttackEvent(data: FUInlineAutomations.FUEventData): Promise<void> { await this.handleItemEvent(data) }
-  private static async handleSkillEvent(data: FUInlineAutomations.FUEventData): Promise<void> { await this.handleItemEvent(data) }
-  private static async handleSpellEvent(data: FUInlineAutomations.FUEventData): Promise<void> { await this.handleItemEvent(data) }
+  private static async handleDamageEvent(data: FUInlineAutomations.FUEventData): Promise<void> { 
+    await this.handleItemEvent({ ...data, actor: data.sourceActor ?? data.actor })
+  }
+  private static async handleSkillEvent(data: FUInlineAutomations.FUEventData): Promise<void> { await this.handleItemEvent(this.conformEventData(data)) }
+  private static async handleSpellEvent(data: FUInlineAutomations.FUEventData): Promise<void> { await this.handleItemEvent(this.conformEventData(data)) }
+
+  private static conformEventData(data: FUInlineAutomations.FUEventData): FUInlineAutomations.FUEventData {
+    return { ...data, targets: data.targets?.map((t: any) => t.actor ?? t).filter(Boolean) ?? [] }
+  }
 
   private static async handleItemEvent(data: FUInlineAutomations.FUEventData): Promise<void> {
     try {
@@ -42,7 +48,7 @@ export class HookManager {
       const effects = Parser.parseHtmlEffects(item.system.description)
       await this.processEffects(effects.self, data.actor, item, [data.actor])
       if (!data.targets || !Array.isArray(data.targets)) return
-      await this.processEffects(effects.target, data.actor, item, data.targets.map(t => t.actor))
+      await this.processEffects(effects.target, data.actor, item, data.targets as game.ProjectFU.FUActor[])
     } catch (error) {
       Logger.error(`HookManager: Failed to process item event for ${data.item.name}: ${error instanceof Error ? error.message : String(error)}`)
     }
@@ -59,7 +65,6 @@ export class HookManager {
     ))
 
     if (effects.choice.length > 0) {
-      const userId = UserPriority.determineOwnerUserId(sourceActor)
       const selectedEffect = await EffectDialog.selectUpdateRequest(effects.choice)
       if (!selectedEffect) return
       const message = `${sourceActor.name} applies ${TextFormat.formatUpdateRequest(selectedEffect)}`
@@ -71,7 +76,7 @@ export class HookManager {
   static cleanup(): void {
     if (!this.isInitialized) return
 
-    Hooks.off(FUHooks.ATTACK_EVENT, this.handleAttackEvent.bind(this))
+    Hooks.off(FUHooks.DAMAGE_PIPELINE_POST_CALCULATE, this.handleDamageEvent.bind(this))
     Hooks.off(FUHooks.SKILL_EVENT, this.handleSkillEvent.bind(this))
     Hooks.off(FUHooks.SPELL_EVENT, this.handleSpellEvent.bind(this))
     this.isInitialized = false

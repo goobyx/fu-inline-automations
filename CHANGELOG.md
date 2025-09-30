@@ -1,6 +1,17 @@
 # Changelog
 
-## [1.0.2] - 2025-09-20
+## [1.0.4] - 2025-09-24
+
+### Added
+- Weapon command support
+- Effect command creation by uuid and base64 for guided effects
+
+### Improved
+- Default effect duration to end of scene, excluding resources and conditions
+- Parser duration events
+- Chat card creation time increased so they are added after the item name
+
+## [1.0.3] - 2025-09-20
 
 ### Added
 - Spell and skill support

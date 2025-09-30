@@ -1,14 +1,11 @@
 // Global declaration for ProjectFU classes
 declare global {
   namespace FUInlineAutomations {
-    // These were undefined objects
-    interface FUEventTarget {
-      actor: game.ProjectFU.FUActor
-    }
     interface FUEventData {
       actor: game.ProjectFU.FUActor
       item: game.ProjectFU.FUItem
-      targets?: FUEventTarget[]
+      targets?: game.ProjectFU.FUActor[]
+      sourceActor?: game.ProjectFU.FUActor
     }
   }
 
@@ -45,10 +42,9 @@ declare global {
   }
 
   const FUHooks: {
-    ATTACK_EVENT: string
     SKILL_EVENT: string
     SPELL_EVENT: string
-    DAMAGE_PIPELINE_PRE_CALCULATE: string
+    DAMAGE_PIPELINE_POST_CALCULATE: string // preffered because it has the rolled item
     [key: string]: string
   }
 

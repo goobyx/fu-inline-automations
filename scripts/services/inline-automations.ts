@@ -5,9 +5,14 @@ import { ExpressionContext, Expressions } from 'projectfu/expressions/expression
 // @ts-ignore - ProjectFU
 import { DamageRequest, DamagePipeline } from 'projectfu/pipelines/damage-pipeline.mjs'
 // @ts-ignore - ProjectFU
-import { InlineSourceInfo } from 'projectfu/helpers/inline-helper.mjs'
+import { InlineSourceInfo, InlineHelper } from 'projectfu/helpers/inline-helper.mjs'
 // @ts-ignore - ProjectFU
 import { InlineType } from 'projectfu/helpers/inline-type.mjs'
+// @ts-ignore - ProjectFU
+import { InlineWeapon } from 'projectfu/helpers/inline-weapon.mjs'
+// @ts-ignore - ProjectFU
+
+import { Effects } from 'projectfu/pipelines/effects.mjs'
 import { UpdateRequest } from '../types/types.js'
 import { RequestType } from '../types/enums.js'
 import { Logger } from '../utilities/logger.js'
@@ -33,14 +38,24 @@ async function processResource(request: UpdateRequest, sourceActor: game.Project
 
 // @EFFECT[uuid|status|base64]
 async function processEffect(request: UpdateRequest, sourceActor: game.ProjectFU.FUActor, item: game.ProjectFU.FUItem, targets: game.ProjectFU.FUActor[]): Promise<void> {
-  if (request.args.length !== 1) return
+  if (Parser.parseNonConfigArgs(request.args).length !== 1) return
   const value = request.args[0]
-
   if (CONFIG.statusEffects.find(e => e.id === value)) {
     await addStatus(value, targets)
     return
   }
-  // TODO: apply effects by uuid
+  let effect = InlineHelper.fromBase64(value)
+  if (!effect) {
+    effect = await fromUuid(value)
+    effect.type = 'base'
+  }
+
+  if (!effect) return
+  const duration = Parser.parseTypeConfig(request.args)
+  
+  for (const target of targets) {
+    Effects.onApplyEffectToActor(target, effect, createSourceInfo(sourceActor, item), duration)
+  }
 }
 
 // @DMG[amount type]
@@ -72,6 +87,17 @@ async function processType(request: UpdateRequest, sourceActor: game.ProjectFU.F
   ))
 }
 
+async function processWeapon(request: UpdateRequest, sourceActor: game.ProjectFU.FUActor, item: game.ProjectFU.FUItem, targets: game.ProjectFU.FUActor[]) {
+  await Promise.all(targets.map(target => 
+    InlineWeapon.onDropActor(target, undefined, {
+      type: 'InlineWeapon',
+      sourceInfo: createSourceInfo(sourceActor, item),
+      choices: Parser.parseNonConfigArgs(request.args).join(' '),
+      config: Parser.parseTypeConfig(request.args)
+    })
+  ))
+}
+
 async function addStatus(status: string, targets: game.ProjectFU.FUActor[]): Promise<void> {
   await Promise.all(targets.map(target =>
     target.toggleStatusEffect(status, { active: true })
@@ -87,6 +113,7 @@ export const InlineAutomations = {
   processEffect,
   processDamage,
   processType,
+  processWeapon,
   addStatus,
   createSourceInfo
 }

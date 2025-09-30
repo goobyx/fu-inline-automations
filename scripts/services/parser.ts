@@ -73,7 +73,7 @@ export class Parser {
   }
 
   static parseTypeConfig(args: string[]): InlineDurationConfig {
-    const eventMap: { [key: string]: string } = { sot: 'startOfTurn', eot: 'endOfTurn' }
+    const eventMap: { [key: string]: string } = { sot: 'startOfTurn', eot: 'endOfTurn', eos: 'endOfScene', eor: 'endOfRound' }
     const config: InlineDurationConfig = {}
 
     for (const arg of args) {
@@ -85,5 +85,9 @@ export class Parser {
     }
 
     return config
+  }
+
+  static parseNonConfigArgs(args: string[]): string[] {
+    return args.filter(arg => !arg.includes(':'))
   }
 }
