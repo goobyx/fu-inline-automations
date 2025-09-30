@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.5] - 2025-09-24
+
+### Improved
+- Hook for damage dealing
+- Effect processing inputs
+
+### Removed
+- Default durations
+
 ## [1.0.4] - 2025-09-24
 
 ### Added
