@@ -1,0 +1,133 @@
+# Adapted from: https://github.com/League-of-Foundry-Developers/FoundryVTT-Module-Template
+#
+# This workflow:
+#   1. Triggers when you push a version tag (e.g., v1.0.7)
+#   2. Builds the module
+#   3. Creates a GitHub release with the built files
+
+name: Create Module Release
+
+env:
+  project_url: "https://github.com/${{github.repository}}"
+  latest_manifest_url: "https://github.com/${{github.repository}}/releases/latest/download/module.json"
+  release_module_url: "https://github.com/${{github.repository}}/releases/download/${{github.ref_name}}/fu-inline-automations-${{github.ref_name}}.zip"
+
+on:
+  push:
+    tags:
+      - 'v*'  # Trigger on any tag starting with 'v' (e.g., v1.0.7, v1.0.6-test.2)
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Extract Version From Tag
+        id: get_version
+        uses: battila7/get-version-action@v2
+
+      - name: Update package.json Version
+        run: |
+          npm version ${{steps.get_version.outputs.version-without-v}} --no-git-tag-version --allow-same-version
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Module
+        run: npm run build
+
+      - name: Modify Module Manifest With Release-Specific Values
+        id: sub_manifest_link_version
+        uses: cschleiden/replace-tokens@v1
+        with:
+          files: 'module.json'
+        env:
+          VERSION: ${{steps.get_version.outputs.version-without-v}}
+          URL: ${{ env.project_url }}
+          MANIFEST: ${{ env.latest_manifest_url }}
+          DOWNLOAD: ${{ env.release_module_url }}
+
+      - name: Create Module Archive
+        run: |
+          zip                                    \
+            --recurse-paths                      \
+             ./fu-inline-automations-${{github.ref_name}}.zip  \
+            module.json                          \
+            README.md                            \
+            LICENSE                              \
+            CHANGELOG.md                         \
+            dist/                                \
+            languages/
+
+      - name: Extract Changelog Section
+        id: extract_changelog
+        run: |
+          # Extract base version without prerelease suffix (e.g., 1.0.6 from 1.0.6-test.7)
+          BASE_VERSION=$(echo "${{steps.get_version.outputs.version-without-v}}" | sed -E 's/-.*$//')
+          echo "Base version: $BASE_VERSION"
+          
+          # Extract the changelog section for this version
+          # This finds the section starting with ## [$BASE_VERSION] and ending before the next ##
+          CHANGELOG=$(awk -v ver="$BASE_VERSION" '
+            /^## \[/ {
+              if (found) exit;
+              if ($0 ~ "\\[" ver "\\]") {
+                found=1;
+                next;
+              }
+            }
+            found {
+              if (/^## \[/) exit;
+              print;
+            }
+          ' CHANGELOG.md | sed '/^$/d' | head -c 4000)
+          
+          # If no changelog found, use default message
+          if [ -z "$CHANGELOG" ]; then
+            CHANGELOG="Release for ${{github.ref_name}}. See CHANGELOG.md for details."
+          fi
+          
+          # Save to file for multiline content
+          {
+            echo 'CHANGELOG<<EOF'
+            echo "$CHANGELOG"
+            echo 'EOF'
+          } >> $GITHUB_OUTPUT
+      
+      - name: Check if Prerelease
+        id: check_prerelease
+        run: |
+          if [[ "${{github.ref_name}}" =~ (alpha|beta|rc|test) ]]; then
+            echo "prerelease=true" >> $GITHUB_OUTPUT
+          else
+            echo "prerelease=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Determine if prerelease based on tag name
+          PRERELEASE_FLAG=""
+          if [[ "${{github.ref_name}}" =~ (alpha|beta|rc|test) ]]; then
+            PRERELEASE_FLAG="--prerelease"
+          fi
+          
+          # Create release with files atomically
+          gh release create "${{github.ref_name}}" \
+            ./module.json \
+            ./fu-inline-automations-${{github.ref_name}}.zip \
+            --title "Release ${{github.ref_name}}" \
+            --notes "${{steps.extract_changelog.outputs.CHANGELOG}}" \
+            $PRERELEASE_FLAG
