@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.7] - 2025-10-01
+
+### Added
+- Github action for automated releases on tag pushes
+
+### Improved
+- README usage section to make it easier to understand
+
 ## [1.0.5] - 2025-09-24
 
 ### Improved
