@@ -37,7 +37,7 @@ targets: @EFFECT[slow]@EFFECT[weak]
 Some items allow users to choose from multiple effects. In those cases, wrap the options in parentheses.  
 Any readability text outside the inline tags is ignored, as long as the choices are inside the parentheses.
 
-In this case, both items will be parsed exactly the same
+In this case, both items will be parsed identically
 ```
 Target Suffers: (@EFFECT[dazed], @EFFECT[weak], or @LOSS[$sl*10 mp]{SL × 10 MP})
 targets: (@EFFECT[dazed]@EFFECT[weak]@LOSS[$sl*10 mp])
