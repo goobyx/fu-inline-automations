@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.1.0] - 2025-10-08
+
+### Improved
+- Module name for better clarity
+
 ## [1.0.7] - 2025-10-01
 
 ### Added

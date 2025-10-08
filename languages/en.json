@@ -1,7 +1,7 @@
 {
   "fu-inline-automations": {
-    "title": "FU Inline Automations",
-    "description": "Automated inline effect processing for Fabula Ultima",
+    "title": "FU Automatic Effects",
+    "description": "Automatically applies Fabula Ultima effects like @GAIN, @LOSS, and @EFFECT from item descriptions.",
     "settings": {
       "example": "Example Setting"
     },
