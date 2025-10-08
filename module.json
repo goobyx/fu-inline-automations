@@ -1,10 +1,10 @@
 {
   "id": "fu-inline-automations",
-  "title": "FU Inline Automations",
-  "description": "Automated inline effect processing for Fabula Ultima in FoundryVTT. Parses and executes inline automation commands in item descriptions.",
+  "title": "FU Automatic Effects",
+  "description": "Automatically applies Fabula Ultima effects like @GAIN, @LOSS, and @EFFECT from item descriptions.",
   "authors": [
     {
-      "name": "folve"
+      "name": "goobyx"
     }
   ],
   "version": "#{VERSION}#",

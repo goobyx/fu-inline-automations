@@ -1,11 +1,16 @@
-# FU Inline Automations
+# FU Automatic Effects
 
-This module parses and executes inline commands in item descriptions, saving time players can spend elsewhere. Made specifically for [project fabula ultima](https://github.com/League-of-Fabulous-Developers/FoundryVTT-Fabula-Ultima)
+> *Formerly known as FU Inline Automations*
+
+Automatically applies **Fabula Ultima** item effects such as `@GAIN`, `@LOSS`, and `@EFFECT` directly from item descriptions. No more manual clicks after rolling.
+
+This module saves time for both players and GMs by parsing and executing inline commands in your item text.
+Designed specifically for [Project Fabula Ultima](https://github.com/League-of-Fabulous-Developers/FoundryVTT-Fabula-Ultima).
 
 ## Requirements
 
 - **FoundryVTT**: Version 13+
-- **System**: Fabula Ultima (projectfu) 4.1.4
+- **System**: Fabula Ultima (projectfu) 4.1.4 or later
 - **Dependencies**: 
   - [Socket.lib](https://github.com/farling42/foundryvtt-socketlib) 
 

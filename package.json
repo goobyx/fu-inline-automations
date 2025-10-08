@@ -6,7 +6,6 @@
     "build": "vite build",
     "dev": "vite build --watch",
     "watch": "vite build --watch",
-    "link-foundry": "ln -s $(pwd) /home/folve/programs/foundry/foundrydata/Data/modules/FU-Inline-Automations",
     "lint": "eslint scripts/**/*.ts",
     "lint:fix": "eslint scripts/**/*.ts --fix",
     "format": "prettier --write scripts/**/*.{ts,js}",
